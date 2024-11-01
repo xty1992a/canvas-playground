@@ -1,5 +1,4 @@
 import React, {FC, useCallback, useEffect} from 'react'
-import {chunk} from 'lodash-es'
 import * as utils from './utils.ts'
 
 
@@ -11,48 +10,47 @@ interface Item {
 interface Props {
     items: Item[]
     size?: number
+    /** canvas 内边距 */
     padding?: number
-}
-
-interface Point {
-    x: number
-    y: number
+    /** 圆弧拱起尺寸，正向外，负向内 */
+    offset?: number
+    /** 整体旋转角度，默认 0，即从 3 点钟开始 */
+    rotate?: number
 }
 
 const Instrument: FC<Props> = (props) => {
-    const {size = 1000, padding = 100, items} = props;
+    const {size = 1000, padding = 100,offset=100, items, rotate=0} = props;
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     const draw = useCallback(() => {
 
-        //# region setup and define
+        //# region setup
 
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
         if (!canvas) return
         if (!ctx) return
-
         canvas.width = size;
         canvas.height = size;
         canvas.style.cssText = `width: ${size / 2}px; height: ${size / 2}px;`
 
+        //# endregion
+
+        ctx.save()
+        ctx.strokeStyle = 'rgba(224,141,141,0.56)'
+        // 旋转画布
+        ctx.translate(size / 2, size / 2)
+        ctx.rotate(utils.Theta.Degrees(rotate).radians)
+        ctx.translate(-size / 2, -size / 2)
 
         const gap = ((size - padding * 2) / 5) / 2
         const steps = [...Array(5)].fill(0).map((n, i) => (i + 1) * gap)
         const maxlength = Math.max(...steps)
         const origin = {x: size / 2, y: size / 2}
 
-        console.log(items)
-        //# endregion
-
         //# region draw rills
-
-        ctx.strokeStyle = 'rgba(224,141,141,0.56)'
-
         ctx.save()
-
         ctx.translate(size / 2, size / 2);
-
         steps.forEach((step, i) => {
             ctx.beginPath()
             // console.log(`绘制第${i}个圆， 半径为${step / 2}`)
@@ -63,7 +61,6 @@ const Instrument: FC<Props> = (props) => {
             ctx.stroke()
             ctx.closePath()
         })
-
         ctx.restore()
         //# endregion
 
@@ -108,12 +105,14 @@ const Instrument: FC<Props> = (props) => {
             }
         })
 
+
+        //# region draw curve
+
+        ctx.save()
+
         ctx.strokeStyle = 'rgba(193,40,40,1)'
         ctx.lineWidth = 4
-        ctx.save()
         ctx.beginPath()
-
-
         arr.forEach((item, index) => {
             const next = index === arr.length - 1 ? arr[0] : arr[index + 1]
 
@@ -121,7 +120,7 @@ const Instrument: FC<Props> = (props) => {
             const b = next.point
 
             ctx.moveTo(a.x, a.y)
-            const point = utils.getBisectionPoint(a, b, 100)
+            const point = utils.getBisectionPoint(a, b, offset)
             // const mid = utils.getMidpoint(a.x, a.y, b.x, b.y) // 中点
             // ctx.fillRect(mid.x - 5, mid.y - 5, 10, 10)
             ctx.bezierCurveTo(a.x, a.y, point.x, point.y, b.x, b.y)
@@ -129,13 +128,15 @@ const Instrument: FC<Props> = (props) => {
 
         ctx.stroke()
         ctx.closePath()
+
         ctx.restore()
+        //# endregion
 
 
         //# endregion
 
-
-    }, [size, padding, items])
+        ctx.restore()
+    }, [size, padding, items, offset, rotate])
 
     useEffect(draw, [draw]);
 
