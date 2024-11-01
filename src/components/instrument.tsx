@@ -38,6 +38,7 @@ const Instrument: FC<Props> = (props) => {
 
         ctx.save()
         ctx.strokeStyle = 'rgba(224,141,141,0.56)'
+        ctx.lineJoin = 'round'
         // 旋转画布
         ctx.translate(size / 2, size / 2)
         ctx.rotate(utils.Theta.Degrees(rotate).radians)
@@ -58,8 +59,8 @@ const Instrument: FC<Props> = (props) => {
             // ctx.font = '40px serif'
             // ctx.fillText(`${i}`, step / 2 - 10, 0)
             ctx.arc(0, 0, step, 0, Math.PI * 2)
-            ctx.stroke()
             ctx.closePath()
+            ctx.stroke()
         })
         ctx.restore()
         //# endregion
@@ -74,8 +75,8 @@ const Instrument: FC<Props> = (props) => {
             ctx.beginPath()
             ctx.moveTo(start.x + origin.x, start.y + origin.y)
             ctx.lineTo(end.x + origin.x, end.y + origin.y)
-            ctx.stroke()
             ctx.closePath()
+            ctx.stroke()
             ctx.font = '30px serif'
 
             const end0 = utils.polar2Cartesian(endLength + 50, utils.Theta.Degrees(360 / items.length * i))
@@ -111,23 +112,23 @@ const Instrument: FC<Props> = (props) => {
         ctx.save()
 
         ctx.strokeStyle = 'rgba(193,40,40,1)'
-        ctx.lineWidth = 4
+        ctx.lineWidth = 10
         ctx.beginPath()
+        ctx.moveTo(arr[0].point.x, arr[0].point.y)
         arr.forEach((item, index) => {
             const next = index === arr.length - 1 ? arr[0] : arr[index + 1]
 
             const a = item.point
             const b = next.point
 
-            ctx.moveTo(a.x, a.y)
             const point = utils.getBisectionPoint(a, b, offset)
             // const mid = utils.getMidpoint(a.x, a.y, b.x, b.y) // 中点
             // ctx.fillRect(mid.x - 5, mid.y - 5, 10, 10)
             ctx.bezierCurveTo(a.x, a.y, point.x, point.y, b.x, b.y)
         })
 
-        ctx.stroke()
         ctx.closePath()
+        ctx.stroke()
 
         ctx.restore()
         //# endregion
