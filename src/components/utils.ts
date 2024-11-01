@@ -143,8 +143,24 @@ class Vector {
         return new Vector(this.x / length, this.y / length);
     }
 
-    rotate90(): Vector {
-        return new Vector(this.y, -this.x);
+    rotate(angle: number): Vector {
+        const radians = angle * (Math.PI / 180);
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+        return new Vector(
+            this.x * cos - this.y * sin,
+            this.x * sin + this.y * cos
+        );
+    }
+
+    dot(v: Vector): number {
+        return this.x * v.x + this.y * v.y;
+    }
+
+    angleBetween(v: Vector): number {
+        const dot = this.dot(v);
+        const lengths = this.length() * v.length();
+        return Math.acos(dot / lengths) * (180 / Math.PI);
     }
 
     multiply(scalar: number): Vector {
@@ -166,7 +182,7 @@ export function getMidpoint(a: Point, b: Point): Point {
 export function getBisectionPoint(a: Point, b: Point, offset: number): Point {
     const mid = getMidpoint(a, b);
     const abVector = Vector.fromPoints(a, b);
-    const perpendicularVector = abVector.normalize().rotate90().multiply(offset);
+    const perpendicularVector = abVector.normalize().rotate(90).multiply(offset * -1);
     const offsetPoint = new Vector(mid.x, mid.y).add(perpendicularVector);
     return offsetPoint.toPoint();
 }
