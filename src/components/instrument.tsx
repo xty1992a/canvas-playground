@@ -122,7 +122,7 @@ const Instrument: FC<Props> = (props) => {
             const b = next.point
 
             const point = utils.getBisectionPoint(a, b, offset)
-            // const mid = utils.getMidpoint(a.x, a.y, b.x, b.y) // 中点
+            // const mid = utils.getMidpoint(a, b) // 中点
             // ctx.fillRect(mid.x - 5, mid.y - 5, 10, 10)
             ctx.bezierCurveTo(a.x, a.y, point.x, point.y, b.x, b.y)
         })

@@ -111,23 +111,62 @@ export function getCross(rect: Rect, theta: Theta) {
     };
 }
 
-export function getMidpoint(x1: number, y1: number, x2: number, y2: number): { x: number, y: number } {
-    const midpointX = (x1 + x2) / 2;
-    const midpointY = (y1 + y2) / 2;
-    return { x: midpointX, y: midpointY };
+type Point = { x: number, y: number };
+
+class Vector {
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    static fromPoints(a: Point, b: Point): Vector {
+        return new Vector(b.x - a.x, b.y - a.y);
+    }
+
+    add(v: Vector): Vector {
+        return new Vector(this.x + v.x, this.y + v.y);
+    }
+
+    subtract(v: Vector): Vector {
+        return new Vector(this.x - v.x, this.y - v.y);
+    }
+
+    length(): number {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    normalize(): Vector {
+        const length = this.length();
+        return new Vector(this.x / length, this.y / length);
+    }
+
+    rotate90(): Vector {
+        return new Vector(this.y, -this.x);
+    }
+
+    multiply(scalar: number): Vector {
+        return new Vector(this.x * scalar, this.y * scalar);
+    }
+
+    toPoint(): Point {
+        return { x: this.x, y: this.y };
+    }
 }
 
-type Point = { x: number, y: number };
+export function getMidpoint(a: Point, b: Point): Point {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
 /**
  * @description 获取两点中垂线上某一点，offset为偏移量，正负表示上下
  * */
-export function getBisectionPoint(a: Point, b: Point, offset: number) {
-    const mid = getMidpoint(a.x, a.y, b.x, b.y);
-    const angle =  Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
-    const offsetPoint = polar2Cartesian(offset, Theta.Degrees(-90 + angle));
-
-    return {
-        x: mid.x + offsetPoint.x,
-        y: mid.y + offsetPoint.y,
-    }
+export function getBisectionPoint(a: Point, b: Point, offset: number): Point {
+    const mid = getMidpoint(a, b);
+    const abVector = Vector.fromPoints(a, b);
+    const perpendicularVector = abVector.normalize().rotate90().multiply(offset);
+    const offsetPoint = new Vector(mid.x, mid.y).add(perpendicularVector);
+    return offsetPoint.toPoint();
 }

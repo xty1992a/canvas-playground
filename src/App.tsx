@@ -28,7 +28,7 @@ function App() {
             <div>
                 <div className="form">
                     {
-                        items.map(item => <div>
+                        items.map(item => <div key={item.label}>
                             <label>{item.label}</label>
                             <input type="range" min="0" max="1" step="0.01" value={item.value}
                                    onChange={e => update(item.label, parseFloat(e.target.value))}/>
